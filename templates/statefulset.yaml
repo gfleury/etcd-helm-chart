@@ -96,10 +96,6 @@ spec:
             }
             
             createroot() {
-              until etcdctl cluster-health; do
-                sleep 2
-                echo waiting to be ready...
-              done
               if [[ ! -z $ROOTPW ]]; then
                 echo $ROOTPW | etcdctl user add root --interactive=false || true
                 etcdctl auth enable || true
@@ -199,7 +195,9 @@ spec:
                 --initial-cluster ${PEERS} \
                 --initial-cluster-state new \
                 --data-dir /var/run/etcd/default.etcd \
-                --enable-v2=false
+                --enable-v2=false &
+            createroot &
+            fg
   volumeClaimTemplates:
   - metadata:
       name: datadir

@@ -9,7 +9,7 @@ ClientPort: 2379
 Component: "etcd"
 Replicas: 3
 Image: "quay.io/coreos/etcd"
-ImageTag: "3.3.5"
+ImageTag: "v3.3.5"
 ImagePullPolicy: "Always"
 Cpu: "100m"
 Memory: "512Mi"

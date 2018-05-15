@@ -8,6 +8,7 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     component: "{{ .Release.Name }}-{{ .Values.Component }}"
 spec:
+  podManagementPolicy: Parallel
   serviceName: {{ template "etcd.fullname" . }}
   replicas: {{ default 3 .Values.Replicas }}
   template:
@@ -63,12 +64,18 @@ spec:
                 - "/bin/sh"
                 - "-c"
                 - |
-                  if [[ ! -z $ROOTPW ]]; then 
-                    sleep 120
-                    export ETCDCTL_API=3
-                    echo $ROOTPW | etcdctl user add root --interactive=false
-                    etcdctl auth enable
-                  fi
+                  createroot() {
+                    until etcdctl cluster-health; do
+                      sleep 2
+                      echo waiting to be ready...
+                    done
+                    if [[ ! -z $ROOTPW ]]; then
+                      export ETCDCTL_API=3
+                      echo $ROOTPW | etcdctl user add root --interactive=false
+                      etcdctl auth enable
+                    fi
+                  }
+                  createroot &
           preStop:
             exec:
               command:

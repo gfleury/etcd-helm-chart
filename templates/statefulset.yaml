@@ -58,24 +58,6 @@ spec:
         - name: datadir
           mountPath: /var/run/etcd
         lifecycle:
-          postStart:
-            exec:
-              command: 
-                - "/bin/sh"
-                - "-c"
-                - |
-                  createroot() {
-                    until etcdctl cluster-health; do
-                      sleep 2
-                      echo waiting to be ready...
-                    done
-                    if [[ ! -z $ROOTPW ]]; then
-                      export ETCDCTL_API=3
-                      echo $ROOTPW | etcdctl user add root --interactive=false
-                      etcdctl auth enable
-                    fi
-                  }
-                  createroot &
           preStop:
             exec:
               command:
@@ -112,7 +94,19 @@ spec:
                 etcdctl member list | grep http://${HOSTNAME}.${SET_NAME}:2380 | cut -d':' -f1 | cut -d'[' -f1 > /var/run/etcd/member_id
                 exit 0
             }
-
+            
+            createroot() {
+              until etcdctl cluster-health; do
+                sleep 2
+                echo waiting to be ready...
+              done
+              if [[ ! -z $ROOTPW ]]; then
+                export ETCDCTL_API=3
+                echo $ROOTPW | etcdctl user add root --interactive=false || true
+                etcdctl auth enable || true
+              fi
+            }
+            
             eps() {
                 EPS=""
                 for i in $(seq 0 $((${INITIAL_CLUSTER_SIZE} - 1))); do
@@ -137,7 +131,9 @@ spec:
                     --listen-client-urls http://${HOSTNAME}.${SET_NAME}:2379,http://127.0.0.1:2379 \
                     --advertise-client-urls http://${HOSTNAME}.${SET_NAME}:2379 \
                     --data-dir /var/run/etcd/default.etcd \
-                    --enable-v2=false
+                    --enable-v2=false &
+                createroot()
+                fg
             fi
 
             # etcd-SET_ID
@@ -178,13 +174,15 @@ spec:
                     --initial-advertise-peer-urls http://${HOSTNAME}.${SET_NAME}:2380 \
                     --initial-cluster ${ETCD_INITIAL_CLUSTER} \
                     --initial-cluster-state ${ETCD_INITIAL_CLUSTER_STATE} \
-                    --enable-v2=false
+                    --enable-v2=false &
+                createroot()
+                fg
             fi
 
             for i in $(seq 0 $((${INITIAL_CLUSTER_SIZE} - 1))); do
                 while true; do
-                    echo "Waiting for ${SET_NAME}-${i} to come up"
-                    ping -W 1 -c 1 ${SET_NAME}-${i} > /dev/null && break
+                    echo "Waiting for ${SET_NAME}-${i}.${SET_NAME} to come up"
+                    ping -W 1 -c 1 ${SET_NAME}-${i}.${SET_NAME} > /dev/null && break
                     sleep 1s
                 done
             done
@@ -206,7 +204,9 @@ spec:
                 --initial-cluster ${PEERS} \
                 --initial-cluster-state new \
                 --data-dir /var/run/etcd/default.etcd \
-                --enable-v2=false
+                --enable-v2=false &
+            createroot()
+            fg
   volumeClaimTemplates:
   - metadata:
       name: datadir

@@ -8,7 +8,6 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     component: "{{ .Release.Name }}-{{ .Values.Component }}"
 spec:
-  podManagementPolicy: Parallel
   serviceName: {{ template "etcd.fullname" . }}
   replicas: {{ default 3 .Values.Replicas }}
   template:

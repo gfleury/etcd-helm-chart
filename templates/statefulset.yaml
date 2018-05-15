@@ -96,6 +96,7 @@ spec:
             }
             
             createroot() {
+              sleep 60
               if [[ ! -z $ROOTPW ]]; then
                 echo $ROOTPW | etcdctl user add root --interactive=false || true
                 etcdctl auth enable || true
@@ -186,6 +187,7 @@ spec:
             collect_member &
 
             # join member
+            createroot &
             exec etcd --name ${HOSTNAME} \
                 --initial-advertise-peer-urls http://${HOSTNAME}.${SET_NAME}:2380 \
                 --listen-peer-urls http://${_MY_IPADDR}:2380 \
@@ -195,9 +197,7 @@ spec:
                 --initial-cluster ${PEERS} \
                 --initial-cluster-state new \
                 --data-dir /var/run/etcd/default.etcd \
-                --enable-v2=false &
-            createroot &
-            fg
+                --enable-v2=false
   volumeClaimTemplates:
   - metadata:
       name: datadir

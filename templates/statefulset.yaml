@@ -87,6 +87,7 @@ spec:
           - |
             HOSTNAME=$(hostname)
             export ETCDCTL_API=3
+            _MY_IPADDR=$(/sbin/ifconfig | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | sort | awk '{print $1}')
             # store member id into PVC for later member replacement
             collect_member() {
                 while ! etcdctl member list &>/dev/null; do sleep 1; done
@@ -125,9 +126,9 @@ spec:
                 # re-join member
                 ETCDCTL_ENDPOINT=$(eps) etcdctl member update ${member_id} http://${HOSTNAME}.${SET_NAME}:2380
                 exec etcd --name ${HOSTNAME} \
-                    --listen-peer-urls http://${HOSTNAME}.${SET_NAME}:2380 \
-                    --listen-client-urls http://${HOSTNAME}.${SET_NAME}:2379,http://127.0.0.1:2379 \
-                    --advertise-client-urls http://${HOSTNAME}.${SET_NAME}:2379 \
+                    --listen-peer-urls http://${_MY_IPADDR}:2380 \
+                    --listen-client-urls http://${_MY_IPADDR}:2379,http://127.0.0.1:2379 \
+                    --advertise-client-urls http://${_MY_IPADDR}:2379 \
                     --data-dir /var/run/etcd/default.etcd \
                     --enable-v2=false
             fi
@@ -163,11 +164,11 @@ spec:
                 collect_member &
 
                 exec etcd --name ${HOSTNAME} \
-                    --listen-peer-urls http://${HOSTNAME}.${SET_NAME}:2380 \
-                    --listen-client-urls http://${HOSTNAME}.${SET_NAME}:2379,http://127.0.0.1:2379 \
-                    --advertise-client-urls http://${HOSTNAME}.${SET_NAME}:2379 \
+                    --listen-peer-urls http://${_MY_IPADDR}:2380 \
+                    --listen-client-urls http://$${_MY_IPADDR}:2379,http://127.0.0.1:2379 \
+                    --advertise-client-urls http://${_MY_IPADDR}:2379 \
                     --data-dir /var/run/etcd/default.etcd \
-                    --initial-advertise-peer-urls http://${HOSTNAME}.${SET_NAME}:2380 \
+                    --initial-advertise-peer-urls http://${_MY_IPADDR}:2380 \
                     --initial-cluster ${ETCD_INITIAL_CLUSTER} \
                     --initial-cluster-state ${ETCD_INITIAL_CLUSTER_STATE} \
                     --enable-v2=false
@@ -190,10 +191,10 @@ spec:
 
             # join member
             exec etcd --name ${HOSTNAME} \
-                --initial-advertise-peer-urls http://${HOSTNAME}.${SET_NAME}:2380 \
-                --listen-peer-urls http://${HOSTNAME}.${SET_NAME}:2380 \
-                --listen-client-urls http://${HOSTNAME}.${SET_NAME}:2379,http://127.0.0.1:2379 \
-                --advertise-client-urls http://${HOSTNAME}.${SET_NAME}:2379 \
+                --initial-advertise-peer-urls http://${_MY_IPADDR}:2380 \
+                --listen-peer-urls http://${_MY_IPADDR}:2380 \
+                --listen-client-urls http://${_MY_IPADDR}:2379,http://127.0.0.1:2379 \
+                --advertise-client-urls http://${_MY_IPADDR}:2379 \
                 --initial-cluster-token etcd-cluster-1 \
                 --initial-cluster ${PEERS} \
                 --initial-cluster-state new \

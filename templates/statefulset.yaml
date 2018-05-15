@@ -64,6 +64,7 @@ spec:
                 - "-c"
                 - |
                   if [[ ! -z $ROOTPW ]]; then 
+                    export ETCDCTL_API=3
                     echo $ROOTPW | etcdctl user add root --interactive=false
                     etcdctl auth enable
                   fi

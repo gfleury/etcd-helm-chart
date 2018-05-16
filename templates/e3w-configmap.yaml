@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: {{ template "etcd.fullname" . }}-e3w-config
   labels:
-    app: {{ template "etcd.name" . }}
+    app: {{ template "etcd.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}

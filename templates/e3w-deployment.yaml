@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ template "etcd.fullname" . }}-e3w
   labels:
-    app: {{ template "etcd.name" . }}
+    app: {{ template "etcd.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "etcd.name" . }}
+        app: {{ template "etcd.fullname" . }}
         release: {{ .Release.Name }}
     spec:
       containers:

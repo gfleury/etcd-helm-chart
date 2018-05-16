@@ -14,6 +14,9 @@ ImagePullPolicy: "Always"
 Cpu: "100m"
 Memory: "512Mi"
 Storage: "1Gi"
+rootKey: rootKey
+noopPassword: CHANGEME
+e3wPort: 8080
 ## etcd data Persistent Volume Storage Class
 ## If defined, StorageClassName: <storageClass>
 ## If set to "-", StorageClassName: "", which disables dynamic provisioning

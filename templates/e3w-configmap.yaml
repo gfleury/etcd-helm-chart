@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "etcd.fullname" . }}-e3w-config
+  labels:
+    app: {{ template "etcd.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+data:
+  tsuru.conf: |-
+    [app]
+    port={{ .Values.e3wPort }}
+    auth=true
+
+    [etcd]
+    root_key=/{{ .Values.rootKey }}
+    dir_value=
+    addr={{ .Release.Name }}-etcd-0.{{ .Release.Name }}-etcd:2379,{{ .Release.Name }}-etcd-1.{{ .Release.Name }}-etcd:2379,{{ .Release.Name }}-etcd-2.{{ .Release.Name }}-etcd:2379
+    username=noop
+    password={{ .Values.noopPassword }}
+    cert_file=
+    key_file=
+    ca_file=

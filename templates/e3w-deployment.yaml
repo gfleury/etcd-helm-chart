@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "etcd.fullname" . }}-e3w
+  labels:
+    app: {{ template "etcd.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "etcd.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-e3w
+          image: "gfleury/e3w:latest"
+          imagePullPolicy: {{ .Values.ImagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.e3wPort }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.e3wPort }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.e3wPort }}
+          volumeMounts:
+            - name: "{{ template "etcd.fullname" . }}-e3w-config"
+              mountPath: "/app/conf"
+      volumes:
+        - name: {{ template "etcd.fullname" . }}-e3w-config
+          configMap:
+            name: {{ template "etcd.fullname" . }}-e3w-config

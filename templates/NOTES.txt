@@ -4,3 +4,6 @@ etcd has been installed, no API V2 disabled by default.
 {{- if .Values.root_password }}
 Root Password: {{ .Values.root_password }}
 {{- end }}
+{{- if .Values.noopPassword }}
+noop Password: {{ .Values.noopPassword }}
+{{- end }}

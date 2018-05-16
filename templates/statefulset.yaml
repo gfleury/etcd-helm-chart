@@ -127,7 +127,8 @@ spec:
                     --listen-client-urls http://${_MY_IPADDR}:2379,http://127.0.0.1:2379 \
                     --advertise-client-urls http://${HOSTNAME}.${SET_NAME}:2379 \
                     --data-dir /var/run/etcd/default.etcd \
-                    --enable-v2=false
+                    --enable-v2=false \
+                    --auto-tls --peer-auto-tls
             fi
 
             # etcd-SET_ID
@@ -168,7 +169,8 @@ spec:
                     --initial-advertise-peer-urls http://${HOSTNAME}.${SET_NAME}:2380 \
                     --initial-cluster ${ETCD_INITIAL_CLUSTER} \
                     --initial-cluster-state ${ETCD_INITIAL_CLUSTER_STATE} \
-                    --enable-v2=false
+                    --enable-v2=false \
+                    --auto-tls --peer-auto-tls
             fi
 
             for i in $(seq 0 $((${INITIAL_CLUSTER_SIZE} - 1))); do
@@ -197,7 +199,8 @@ spec:
                 --initial-cluster ${PEERS} \
                 --initial-cluster-state new \
                 --data-dir /var/run/etcd/default.etcd \
-                --enable-v2=false
+                --enable-v2=false \
+                --auto-tls --peer-auto-tls
   volumeClaimTemplates:
   - metadata:
       name: datadir

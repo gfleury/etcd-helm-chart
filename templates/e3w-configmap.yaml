@@ -8,7 +8,7 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
 data:
-  tsuru.conf: |-
+  config.default.ini: |-
     [app]
     port={{ .Values.e3wPort }}
     auth=true

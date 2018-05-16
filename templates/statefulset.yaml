@@ -87,6 +87,9 @@ spec:
           - |
             HOSTNAME=$(hostname)
             export ETCDCTL_API=3
+            export ETCDCTL_INSECURE_DISCOVERY=true
+            export ETCDCTL_INSECURE_SKIP_TLS_VERIFY=true
+            export ETCDCTL_INSECURE_TRANSPORT=false
             _MY_IPADDR=$(/sbin/ifconfig | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | sort | awk '{print $1}')
             REQ_AUTH=""
             if [[ ! -z $ROOTPW ]]; then

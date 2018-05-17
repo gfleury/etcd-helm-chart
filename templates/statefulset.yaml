@@ -109,7 +109,7 @@ spec:
                 etcdctl auth enable || true
                 echo {{ .Values.noopPassword }} | etcdctl --user root:$ROOTPW user add noop --interactive=false
                 etcdctl --user root:$ROOTPW role add noop
-                etcdctl --user root:$ROOTPW role grant-permission noop readwrite /trustyou /trustyou0
+                etcdctl --user root:$ROOTPW role grant-permission noop readwrite /{{ .Values.rootKey }} /{{ .Values.rootKey }}0
                 etcdctl --user root:$ROOTPW user grant-role noop noop
               fi
             }

@@ -23,11 +23,11 @@ spec:
             - containerPort: {{ .Values.e3wPort }}
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: {{ .Values.e3wPort }}
           readinessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: {{ .Values.e3wPort }}
           volumeMounts:
             - name: "{{ template "etcd.fullname" . }}-e3w-config"

@@ -107,6 +107,10 @@ spec:
               if [[ ! -z $ROOTPW ]]; then
                 echo $ROOTPW | etcdctl user add root --interactive=false || true
                 etcdctl auth enable || true
+                echo {{ .Values.noopPassword }} | etcdctl --user root:$ROOTPW user add noop --interactive=false
+                etcdctl --user root:$ROOTPW role add noop
+                etcdctl --user root:$ROOTPW role grant-permission noop readwrite /trustyou /trustyou0
+                etcdctl --user root:$ROOTPW user grant-role noop noop
               fi
             }
             

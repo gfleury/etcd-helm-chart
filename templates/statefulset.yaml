@@ -132,7 +132,8 @@ spec:
                 member_id=$(cat /var/run/etcd/member_id)
 
                 # re-join member
-                ETCDCTL_ENDPOINT=$(eps) etcdctl ${REQ_AUTH} member update ${member_id} https://${HOSTNAME}.${SET_NAME}:2380
+                echo "Trying to join ${member_id} to the cluster"
+                ETCDCTL_ENDPOINT=$(eps) etcdctl ${REQ_AUTH} member update ${member_id} --peer-urls="https://${HOSTNAME}.${SET_NAME}:2380" || true
                 exec etcd --name ${HOSTNAME} \
                     --listen-peer-urls https://${_MY_IPADDR}:2380 \
                     --listen-client-urls https://${_MY_IPADDR}:2379,https://127.0.0.1:2379 \

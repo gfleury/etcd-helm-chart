@@ -76,7 +76,7 @@ spec:
 
                   echo "Removing ${HOSTNAME} from etcd cluster"
 
-                  ETCDCTL_ENDPOINT=${EPS} etcdctl member remove $(member_hash)
+                  ETCDCTL_ENDPOINTS=${EPS} etcdctl member remove $(member_hash)
                   if [ $? -eq 0 ]; then
                       # Remove everything otherwise the cluster will no longer scale-up
                       rm -rf /var/run/etcd/*
@@ -133,7 +133,7 @@ spec:
 
                 # re-join member
                 echo "Trying to join ${member_id} to the cluster"
-                ETCDCTL_ENDPOINT=$(eps) etcdctl ${REQ_AUTH} member update ${member_id} --peer-urls="https://${HOSTNAME}.${SET_NAME}:2380" || true
+                ETCDCTL_ENDPOINTS=$(eps) etcdctl ${REQ_AUTH} member update ${member_id} --peer-urls="https://${HOSTNAME}.${SET_NAME}:2380" || true
                 exec etcd --name ${HOSTNAME} \
                     --listen-peer-urls https://${_MY_IPADDR}:2380 \
                     --listen-client-urls https://${_MY_IPADDR}:2379,https://127.0.0.1:2379 \
@@ -148,7 +148,7 @@ spec:
 
             # adding a new member to existing cluster (assuming all initial pods are available)
             if [ "${SET_ID}" -ge ${INITIAL_CLUSTER_SIZE} ]; then
-                export ETCDCTL_ENDPOINT=$(eps)
+                export ETCDCTL_ENDPOINTS=$(eps)
 
                 # member already added?
                 MEMBER_HASH=$(member_hash)

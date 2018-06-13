@@ -31,6 +31,21 @@ spec:
       tolerations:
 {{ toYaml .Values.Tolerations | indent 8 }}
 {{- end }}
+      volumes:
+      - name: ca-volume
+        persistentVolumeClaim:
+          claimName: {{ template "etcd.fullname" . }}-certificates
+      initContainers:
+      - name: configurator-container
+        image: gfleury/openssl-ca:latest
+        imagePullPolicy: Always
+        command: ['sh', '-c', 'export CA_PATH=/opt/ca && /root/opt/ca/scripts/common.sh && ${CA_PATH}/scripts/self_signed.sh && ${CA_PATH}/scripts/generate_certificate.sh ${SET_NAME}']
+        volumeMounts:
+        - name: ca-volume
+          mountPath: /opt/ca
+        env:
+        - name: SET_NAME
+          value: {{ template "etcd.fullname" . }}
       containers:
       - name: {{ template "etcd.fullname" . }}
         image: "{{ .Values.Image }}:{{ .Values.ImageTag }}"
@@ -56,6 +71,8 @@ spec:
         volumeMounts:
         - name: datadir
           mountPath: /var/run/etcd
+        - name: ca-volume
+          mountPath: /opt/ca
         lifecycle:
           preStop:
             exec:
@@ -140,7 +157,8 @@ spec:
                     --advertise-client-urls https://${HOSTNAME}.${SET_NAME}:2379 \
                     --data-dir /var/run/etcd/default.etcd \
                     --enable-v2=false \
-                    --auto-tls --peer-auto-tls
+                    --peer-auto-tls \
+                    --cert-file=/opt/ca/newcerts/${SET_NAME}.cert.pem --key-file=/opt/ca/private/${SET_NAME}.key
             fi
 
             # etcd-SET_ID
@@ -182,7 +200,8 @@ spec:
                     --initial-cluster ${ETCD_INITIAL_CLUSTER} \
                     --initial-cluster-state ${ETCD_INITIAL_CLUSTER_STATE} \
                     --enable-v2=false \
-                    --auto-tls --peer-auto-tls
+                    --peer-auto-tls \
+                    --cert-file=/opt/ca/newcerts/${SET_NAME}.cert.pem --key-file=/opt/ca/private/${SET_NAME}.key
             fi
 
             for i in $(seq 0 $((${INITIAL_CLUSTER_SIZE} - 1))); do
@@ -212,7 +231,8 @@ spec:
                 --initial-cluster-state new \
                 --data-dir /var/run/etcd/default.etcd \
                 --enable-v2=false \
-                --auto-tls --peer-auto-tls
+                --peer-auto-tls \
+                --cert-file=/opt/ca/newcerts/${SET_NAME}.cert.pem --key-file=/opt/ca/private/${SET_NAME}.key
   volumeClaimTemplates:
   - metadata:
       name: datadir
